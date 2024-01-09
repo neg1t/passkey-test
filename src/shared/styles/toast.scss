@@ -1,0 +1,15 @@
+.Toastify__toast {
+  font-family: var(--font-family) !important;
+}
+
+.Toastify__toast-theme--colored {
+  &.Toastify__toast {
+    &--error {
+      background-color: var(--error-border) !important;
+    }
+
+    &--success {
+      background-color: var(--primary) !important;
+    }
+  }
+}
