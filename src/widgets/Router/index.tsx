@@ -10,13 +10,18 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import type { MenuProps } from 'antd'
-import { Layout, Menu, theme } from 'antd'
+import { Avatar, Button, Dropdown, Layout, Menu, theme } from 'antd'
+import {
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
+import logo from 'shared/assets/logo.png'
 
 import { menuModel } from 'entities/menu'
-import { userRoleModel } from 'entities/role'
 import { $availableRoutes } from './model/routes'
-import logo from 'shared/assets/logo.png'
 import { PageLoader } from 'shared/ui/PageLoader'
+import './styles.scss'
 
 const { Header, Content, Footer, Sider } = Layout
 
@@ -31,12 +36,11 @@ export const Router = () => {
   const [collapsed, setCollapsed] = useState(false)
 
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { colorBgContainer, borderRadiusLG, paddingLG },
   } = theme.useToken()
 
   const location = useLocation()
   const navigate = useNavigate()
-  const role = useUnit(userRoleModel.stores.$role)
   const routes = useUnit($availableRoutes)
 
   const tabs: MenuItem[] = useUnit(menuModel.$pageHeaderTabs).map(
@@ -71,6 +75,23 @@ export const Router = () => {
     tabs.findIndex((tab) => tab.path === location.pathname),
   )
 
+  const avatarMenu: MenuProps['items'] = [
+    {
+      key: '1',
+      onClick: () => {},
+      label: (
+        <span>
+          <UserOutlined /> Аккаунт
+        </span>
+      ),
+    },
+    {
+      key: '2',
+      onClick: () => {},
+      label: <span>Выйти</span>,
+    },
+  ]
+
   return (
     <>
       <CSSTransition
@@ -81,49 +102,75 @@ export const Router = () => {
       >
         <PageLoader logo={<img src={logo} alt='Logo' />} />
       </CSSTransition>
-      <Layout style={{ minHeight: '100vh' }}>
-        <Sider
-          theme='light'
-          collapsible
-          collapsed={collapsed}
-          onCollapse={(value) => setCollapsed(value)}
-        >
-          <div className='demo-logo-vertical' />
+      <Layout className='layout' style={{ minHeight: '100vh' }}>
+        <Sider theme='light' collapsible collapsed={collapsed} trigger={null}>
+          <div className='slider-logo'>
+            <img src={logo} alt='Лого' />
+          </div>
           <Menu
-            onClick={(item) => console.log(item)}
             defaultSelectedKeys={['1']}
             mode='inline'
             items={tabs}
             selectedKeys={[selectedKey.toString()]}
           />
         </Sider>
-        <Layout>
-          <Header style={{ padding: 0, background: colorBgContainer }} />
-          <Content style={{ margin: '20px 16px 0px 16px' }}>
-            <article
-              style={{
-                padding: 24,
-                minHeight: 360,
-                background: colorBgContainer,
-                borderRadius: borderRadiusLG,
-              }}
-            >
-              <Routes>
-                {routes.map(({ path, Component }) => (
-                  <Route key={path} path={path} element={Component} />
-                ))}
 
-                {!!routes.length && (
-                  <Route
-                    path='*'
-                    element={<Navigate to={routes[0].path} replace />}
-                  />
-                )}
-              </Routes>
-            </article>
+        <Layout>
+          <Header
+            className='layout__header'
+            style={{
+              background: colorBgContainer,
+            }}
+          >
+            <Button
+              type='text'
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{
+                width: 64,
+                height: 64,
+              }}
+            />
+
+            <Dropdown
+              placement='bottomRight'
+              arrow
+              overlayClassName='avatar-dropdown-overlay'
+              menu={{ items: avatarMenu }}
+            >
+              <Avatar className='header-avatar'>??</Avatar>
+            </Dropdown>
+          </Header>
+
+          <Content
+            className='layout__content'
+            style={{
+              padding: paddingLG,
+              borderRadius: borderRadiusLG,
+            }}
+          >
+            <Routes>
+              {routes.map(({ path, Component }) => (
+                <Route key={path} path={path} element={Component} />
+              ))}
+
+              {!!routes.length && (
+                <Route
+                  path='*'
+                  element={<Navigate to={routes[0].path} replace />}
+                />
+              )}
+            </Routes>
           </Content>
-          <Footer style={{ textAlign: 'center', padding: 10 }}>
-            Версия: {import.meta.env.VITE_VERSION}
+
+          <Footer
+            className='layout__footer'
+            style={{
+              background: colorBgContainer,
+            }}
+          >
+            <span>Версия {import.meta.env.VITE_VERSION}</span>
+            <span>© 2023 Telcell Wallet. All right reserved.</span>
           </Footer>
         </Layout>
       </Layout>

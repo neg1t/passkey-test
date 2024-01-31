@@ -1,0 +1,69 @@
+$headerHeight : 60px;
+$footerHeight : 40px;
+$contentHegiht: calc(100vh - $headerHeight - $footerHeight);
+
+.layout {
+  min-height: 100vh;
+
+  &__header {
+    padding        : 0;
+    max-height     : $headerHeight;
+    height         : 100%;
+    display        : flex;
+    align-items    : center;
+    justify-content: space-between;
+
+    .header-avatar {
+      margin-right: 20px;
+      cursor      : pointer;
+    }
+  }
+
+  &__content {
+    overflow       : auto;
+    max-height     : $contentHegiht;
+    height         : 100%;
+    scrollbar-color: #ff957a transparent;
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+      width           : 10px;
+      height          : 10px;
+      background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius   : 3px;
+      background-color: #ff957a;
+    }
+  }
+
+  &__footer {
+    max-height     : $footerHeight;
+    height         : 100%;
+    display        : flex;
+    align-items    : center;
+    justify-content: space-between;
+    padding        : 12px 24px;
+  }
+
+  .slider-logo {
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+
+    img {
+      width  : 100%;
+      padding: 10px;
+    }
+  }
+
+  .ant-menu.ant-menu-root.ant-menu-inline,
+  .ant-menu.ant-menu-root.ant-menu-vertical {
+    border-inline-end: unset;
+  }
+}
+
+.avatar-dropdown-overlay {
+  width: 200px;
+}

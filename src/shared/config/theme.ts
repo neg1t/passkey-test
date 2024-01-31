@@ -9,6 +9,9 @@ const components: ThemeConfig['components'] = {
   Menu: {
     itemSelectedColor: '#d9503b',
   },
+  Typography: {
+    titleMarginBottom: 0,
+  },
 }
 
 export const themeConfig: ThemeConfig = {

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 
-export const useComponentWillUnmount = (cleanupCallback: VoidFunction) => {
+const useComponentWillUnmount = (cleanupCallback: VoidFunction) => {
   const callbackRef = React.useRef(cleanupCallback)
 
   callbackRef.current = cleanupCallback
@@ -9,3 +9,5 @@ export const useComponentWillUnmount = (cleanupCallback: VoidFunction) => {
     return () => callbackRef.current()
   }, [])
 }
+
+export default useComponentWillUnmount

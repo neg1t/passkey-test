@@ -1,12 +1,21 @@
 /* eslint-disable no-useless-escape */
 import { Rule } from 'effector-forms'
 
+export const validationText = {
+  required: 'Поле обязательно',
+  incorrectSymbolCount: 'Неверное количество символов',
+  email: 'Введенная электронная почта некорректна',
+  phone: 'Введенный телефон некорректен',
+  numberOnly: 'Введенное число некорректно',
+  notZero: 'Не может быть 0',
+}
+
 const RequiredValidator: Rule<string | number | any> = {
   name: 'required',
   validator: (val) => {
     return val !== null ? val?.toString().length > 0 : val !== null
   },
-  errorText: 'Поле обязательно',
+  errorText: validationText.required,
 }
 
 const MinMaxValueValidator = (
@@ -35,7 +44,7 @@ const MinMaxValueValidator = (
       }
       return thatVal.length >= min && thatVal.length <= max
     },
-    errorText: 'Неверное количество символов',
+    errorText: validationText.incorrectSymbolCount,
   }
 }
 
@@ -47,18 +56,18 @@ const RequiredArrayValidator: Rule<string> = {
     }
     return true
   },
-  errorText: 'Поле обязательно',
+  errorText: validationText.required,
 }
 
 const EmailValidator: Rule<string> = {
   name: 'email',
   validator: (val) => (val ? /^[\w-\.]+@[\w-]+\.[a-z]{2,4}$/i.test(val) : true),
-  errorText: 'Введенная электронная почта некорректна',
+  errorText: validationText.email,
 }
 
 const PhoneValidator: Rule<string> = {
   name: 'phone',
-  errorText: 'Введенный телефон некорректен',
+  errorText: validationText.phone,
   validator: (val) => {
     if (val === null || val === '') {
       return true
@@ -76,12 +85,12 @@ const NumbersOnlyValidator: Rule<string | number> = {
       .toString()
       ?.split('')
       .every((x) => '1234567890'.includes(x)),
-  errorText: 'Введенное число некорректно',
+  errorText: validationText.numberOnly,
 }
 
 const NotZero: Rule<string | number | undefined> = {
   name: 'not-zero',
-  errorText: 'Не может быть 0',
+  errorText: validationText.notZero,
   validator: (val) => {
     return val !== 0 && val !== '0'
   },
