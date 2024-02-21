@@ -1,7 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ErrorBoundary } from 'shared/utils/ErrorBoundary'
-import { showSuccessCopyAlert } from 'shared/utils/helpers'
 import { Router } from 'widgets/Router'
 
 export const AppContainer: React.FC = () => {
@@ -16,7 +15,7 @@ export const AppContainer: React.FC = () => {
   }
 
   return (
-    <ErrorBoundary onGoBack={onGoBackHandler} onCopy={showSuccessCopyAlert}>
+    <ErrorBoundary onGoBack={onGoBackHandler}>
       <Router />
     </ErrorBoundary>
   )

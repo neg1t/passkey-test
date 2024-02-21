@@ -4,14 +4,22 @@ import axios, {
   AxiosResponse,
   AxiosRequestConfig,
 } from 'axios'
+import { tokenModel } from 'entities/token'
+import { API_ROOT } from 'shared/config/const'
+
+const { events, stores } = tokenModel
 
 const axiosInstance: AxiosInstance = axios.create({
-  // baseURL: API_ROOT,
+  baseURL: API_ROOT,
   timeout: 120000,
 })
 
 const errorHandler = (error: AxiosError) => {
   if (error?.response?.status === 401) {
+    const token = stores.$accessToken.getState()
+    if (token.length !== 0) {
+      events.logout()
+    }
     return
   }
 

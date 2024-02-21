@@ -21,6 +21,7 @@ import logo from 'shared/assets/logo.png'
 import { menuModel } from 'entities/menu'
 import { $availableRoutes } from './model/routes'
 import { PageLoader } from 'shared/ui/PageLoader'
+import { tokenModel } from 'entities/token'
 import './styles.scss'
 
 const { Header, Content, Footer, Sider } = Layout
@@ -42,6 +43,7 @@ export const Router = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const routes = useUnit($availableRoutes)
+  const token = useUnit(tokenModel.stores.$tokenData)
 
   const tabs: MenuItem[] = useUnit(menuModel.$pageHeaderTabs).map(
     (tab, index) => ({
@@ -95,7 +97,7 @@ export const Router = () => {
   return (
     <>
       <CSSTransition
-        // in={!role}
+        in={!token}
         timeout={500}
         classNames='modal-transition'
         unmountOnExit
@@ -170,7 +172,7 @@ export const Router = () => {
             }}
           >
             <span>Версия {import.meta.env.VITE_VERSION}</span>
-            <span>© 2023 Telcell Wallet. All right reserved.</span>
+            <span>© 2024 Company. All right reserved.</span>
           </Footer>
         </Layout>
       </Layout>
