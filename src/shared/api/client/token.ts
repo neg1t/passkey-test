@@ -1,3 +1,3 @@
 import { createStore } from 'effector'
 
-export const $accessToken = createStore<string | null>(null)
+export const $accessToken = createStore<string | null>('dfdfdff')

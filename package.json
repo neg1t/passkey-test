@@ -1,7 +1,7 @@
 {
   "name": "sf.admin.react.template",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "start": "cross-env VITE_VERSION=$npm_package_version vite --host",

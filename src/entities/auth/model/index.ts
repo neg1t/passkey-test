@@ -35,9 +35,7 @@ const $manager = createStore<UserManager>(
   }),
 )
 
-export const $tokenData = $accessToken.map<ITokenData | null>((x) =>
-  x ? jwtDecode(x) : null,
-)
+export const $tokenData = $accessToken.map((x) => x)
 
 export const initUserManagerFx = attach({
   source: $manager,
