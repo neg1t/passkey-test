@@ -1,10 +1,12 @@
 /// <reference types="vite/client" />
 
-import 'axios'
+type URLString = `http://${string}` | `https://${string}`
 
-declare module 'axios' {
-  export interface AxiosRequestConfig {
-    returnHeaders?: boolean
-    noAlert?: boolean
-  }
+interface ImportMetaEnv {
+  VITE_API_ROOT: URLString
+  VITE_NODE_ENV: 'development' | 'stage' | 'production'
+  VITE_AUTH_URL: URLString
+  VITE_CLIENT_ID: string
+  VITE_REDIRECT_URI: URLString
+  VITE_SCOPE: string
 }

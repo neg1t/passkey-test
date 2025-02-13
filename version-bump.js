@@ -1,7 +1,7 @@
-const jsonfile = require('jsonfile')
-const path = require('path')
-const gitlog = require('gitlog').default
-const { execSync } = require('child_process')
+import { execSync } from 'child_process'
+import gitlog from 'gitlog'
+import jsonfile from 'jsonfile'
+import path from 'path'
 
 const KEY_WORD = 'new version'
 
@@ -31,7 +31,7 @@ function updateVersion(type, version) {
     .join('.')
 }
 
-const packageJsonPath = path.join(__dirname, 'package.json')
+const packageJsonPath = path.join('./', 'package.json')
 
 // Загрузка текущей версии из package.json
 const packageJson = jsonfile.readFileSync(packageJsonPath)
@@ -52,49 +52,54 @@ const commitTypes = {
 }
 
 const options = {
-  repo: __dirname,
+  repo: './',
   number: 100, // максимальное количество коммитов для анализа
   fields: ['hash', 'subject'],
 }
-const commits = gitlog(options)
 
-const parsedCommits = []
-for (const commit of commits) {
-  const isNewVersion = commit.subject.includes(KEY_WORD)
-  if (isNewVersion) {
-    console.log('Найден коммит с последней версией')
-    console.log(commit)
-    break
+async function run() {
+  const commits = await gitlog(options)
+
+  const parsedCommits = []
+  for (const commit of commits) {
+    const isNewVersion = commit.subject.includes(KEY_WORD)
+    if (isNewVersion) {
+      console.log('Найден коммит с последней версией')
+      console.log(commit)
+      break
+    }
+    parsedCommits.unshift(commit)
   }
-  parsedCommits.unshift(commit)
+
+  for (const commit of parsedCommits) {
+    const commitType = commit.subject.split(':')[0].trim()
+    if (commitType.at(commitType.length - 1) === '!') {
+      newVersion = updateVersion('major', newVersion)
+    }
+    if (commitTypes[commitType.split('(')[0]]) {
+      newVersion = updateVersion(commitType.split('(')[0], newVersion)
+    }
+  }
+
+  // Если версия изменилась, то обновляем ее в package.json и создаем коммит
+  if (newVersion !== currentVersion) {
+    // Обновление версии в package.json asd
+    packageJson.version = newVersion
+    jsonfile.writeFileSync(packageJsonPath, packageJson, { spaces: 2 })
+
+    // Создание коммита с обновленной версией
+    const commitCommand = `git commit -am "${KEY_WORD} ${newVersion}"`
+    execSync(commitCommand)
+
+    // Произведение git push
+    const pushCommand = 'git push'
+    execSync(pushCommand)
+
+    console.log(`Версия увеличена с ${currentVersion} до ${newVersion}`)
+    console.log('Коммит и push выполнены')
+  } else {
+    console.log('Версия не изменилась')
+  }
 }
 
-for (const commit of parsedCommits) {
-  const commitType = commit.subject.split(':')[0].trim()
-  if (commitType.at(commitType.length - 1) === '!') {
-    newVersion = updateVersion('major', newVersion)
-  }
-  if (commitTypes[commitType.split('(')[0]]) {
-    newVersion = updateVersion(commitType.split('(')[0], newVersion)
-  }
-}
-
-// Если версия изменилась, то обновляем ее в package.json и создаем коммит
-if (newVersion !== currentVersion) {
-  // Обновление версии в package.json asd
-  packageJson.version = newVersion
-  jsonfile.writeFileSync(packageJsonPath, packageJson, { spaces: 2 })
-
-  // Создание коммита с обновленной версией
-  const commitCommand = `git commit -am "${KEY_WORD} ${newVersion}"`
-  execSync(commitCommand)
-
-  // Произведение git push
-  const pushCommand = 'git push'
-  execSync(pushCommand)
-
-  console.log(`Версия увеличена с ${currentVersion} до ${newVersion}`)
-  console.log('Коммит и push выполнены')
-} else {
-  console.log('Версия не изменилась')
-}
+run()
