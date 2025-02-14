@@ -4,32 +4,34 @@ import { combine, createStore } from 'effector'
 import { MainPage } from 'pages/Main'
 import { Profile } from 'pages/Profile'
 
+import { AppRoutes } from 'shared/config'
+
 import type { IRoute, ITab } from './types'
 
 export const $routes = createStore<IRoute[]>([
   {
-    path: '/main',
+    path: AppRoutes.Main.path,
     Component: <MainPage />,
   },
   {
-    path: '/profile',
+    path: AppRoutes.Profile.path,
     Component: <Profile />,
   },
 ])
 
 export const $allTabs = createStore<ITab[]>([
   {
-    path: '/main',
+    path: AppRoutes.Main.path,
     text: 'Главная',
     icon: FireOutlined,
   },
   {
-    path: '/profile',
+    path: AppRoutes.Profile.path,
     text: 'Профиль',
     icon: FireOutlined,
   },
   {
-    path: '/another',
+    path: AppRoutes.Another.path,
     text: 'Другая',
     icon: FireOutlined,
   },

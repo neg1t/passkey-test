@@ -2,6 +2,8 @@ import { type Scope } from 'effector'
 import { Provider } from 'effector-react'
 import { BrowserRouter } from 'react-router-dom'
 
+import { RouterEffects } from 'shared/lib/router-effects'
+
 import './init'
 import { ErrorBoundaryRedirect } from './providers/error-boundary'
 import { ThemeProvider } from './providers/theme'
@@ -16,9 +18,11 @@ export const App = ({ scope }: AppProps) => {
     <Provider value={scope}>
       <ThemeProvider>
         <BrowserRouter>
-          <ErrorBoundaryRedirect>
-            <Router />
-          </ErrorBoundaryRedirect>
+          <RouterEffects>
+            <ErrorBoundaryRedirect>
+              <Router />
+            </ErrorBoundaryRedirect>
+          </RouterEffects>
         </BrowserRouter>
       </ThemeProvider>
     </Provider>
