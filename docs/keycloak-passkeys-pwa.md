@@ -100,6 +100,7 @@ VITE_AUTH_URL='https://<keycloak-ngrok-url>/realms/passkeys-demo'
 VITE_CLIENT_ID='react-template-pwa'
 VITE_REDIRECT_URI='https://<vercel-project-domain>/main'
 VITE_SCOPE='openid profile email'
+VITE_AUTH_NGROK_SKIP_BROWSER_WARNING='true'
 ```
 
 5. Redeploy проекта обязателен после изменения `VITE_*` переменных.

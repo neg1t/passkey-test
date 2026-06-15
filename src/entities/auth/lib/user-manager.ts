@@ -5,12 +5,14 @@ export type CreateUserManagerParams = {
   clientId: string
   redirectUri: string
   scope: string
+  skipNgrokBrowserWarning?: boolean
 }
 export function createUserManager({
   authority,
   clientId,
   redirectUri,
   scope,
+  skipNgrokBrowserWarning = false,
 }: CreateUserManagerParams) {
   return new UserManager({
     authority,
@@ -27,5 +29,11 @@ export function createUserManager({
     automaticSilentRenew: true,
 
     monitorSession: false,
+
+    extraHeaders: skipNgrokBrowserWarning
+      ? {
+          'ngrok-skip-browser-warning': 'true',
+        }
+      : undefined,
   })
 }

@@ -5,7 +5,13 @@ import { debug } from 'patronum'
 
 import { $accessToken, apiApiRequestError } from 'shared/api'
 import { AuthError } from 'shared/api'
-import { AUTH_URL, CLIENT_ID, REDIRECT_URI, SCOPE } from 'shared/config'
+import {
+  AUTH_NGROK_SKIP_BROWSER_WARNING,
+  AUTH_URL,
+  CLIENT_ID,
+  REDIRECT_URI,
+  SCOPE,
+} from 'shared/config'
 
 import { createUserManager } from '../lib/user-manager'
 
@@ -32,6 +38,7 @@ const $manager = createStore<UserManager>(
     clientId: CLIENT_ID,
     redirectUri: REDIRECT_URI,
     scope: SCOPE,
+    skipNgrokBrowserWarning: AUTH_NGROK_SKIP_BROWSER_WARNING,
   }),
 )
 
