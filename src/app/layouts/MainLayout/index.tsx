@@ -16,6 +16,8 @@ import {
 } from 'antd'
 import { CSSTransition } from 'react-transition-group'
 
+import { logout } from 'entities/auth/model'
+
 import logo from 'shared/assets/logo.png'
 import { PageLoader } from 'shared/ui/PageLoader'
 
@@ -55,7 +57,7 @@ export function MainLayout({
     {
       key: '2',
       onClick: () => {},
-      label: <span>Выйти</span>,
+      label: <span onClick={logout}>Выйти</span>,
     },
   ]
 
