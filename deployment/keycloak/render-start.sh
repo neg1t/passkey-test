@@ -2,6 +2,7 @@
 set -eu
 
 export KC_HTTP_ENABLED="${KC_HTTP_ENABLED:-true}"
+export KC_HTTP_HOST="${KC_HTTP_HOST:-0.0.0.0}"
 export KC_HTTP_PORT="${PORT:-8080}"
 export KC_PROXY_HEADERS="${KC_PROXY_HEADERS:-xforwarded}"
 export KC_HOSTNAME_STRICT="${KC_HOSTNAME_STRICT:-false}"
@@ -30,6 +31,7 @@ fi
 
 exec /opt/keycloak/bin/kc.sh start-dev \
   --http-enabled="${KC_HTTP_ENABLED}" \
+  --http-host="${KC_HTTP_HOST}" \
   --http-port="${KC_HTTP_PORT}" \
   --proxy-headers="${KC_PROXY_HEADERS}" \
   --hostname-strict="${KC_HOSTNAME_STRICT}"

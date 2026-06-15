@@ -40,6 +40,7 @@ PORT=8080
 DATABASE_URL=<Render internal database URL>
 KC_BOOTSTRAP_ADMIN_USERNAME=admin
 KC_BOOTSTRAP_ADMIN_PASSWORD=<strong temporary password>
+KC_HTTP_HOST=0.0.0.0
 KC_PROXY_HEADERS=xforwarded
 KC_HOSTNAME_STRICT=false
 ```
