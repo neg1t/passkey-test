@@ -1,0 +1,7 @@
+FROM quay.io/keycloak/keycloak:26.6.3
+
+COPY --chmod=755 deployment/keycloak/render-start.sh /opt/keycloak/render-start.sh
+
+EXPOSE 8080
+
+ENTRYPOINT ["/opt/keycloak/render-start.sh"]
