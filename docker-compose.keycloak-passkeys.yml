@@ -1,0 +1,21 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6.3
+    container_name: react-template-keycloak-passkeys
+    command:
+      - start-dev
+      - --http-enabled=true
+      - --proxy-headers=xforwarded
+      - --hostname-strict=false
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
+    ports:
+      - '8080:8080'
+    volumes:
+      - keycloak_passkeys_data:/opt/keycloak/data
+
+# Passkeys are bound to the relying-party host. For repeatable tests, prefer a
+# named Cloudflare Tunnel with a stable domain instead of changing trycloudflare.com URLs.
+volumes:
+  keycloak_passkeys_data:

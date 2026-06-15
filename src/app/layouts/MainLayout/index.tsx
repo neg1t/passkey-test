@@ -105,7 +105,7 @@ export function MainLayout({
             <Dropdown
               placement="bottomRight"
               arrow
-              overlayClassName="avatar-dropdown-overlay"
+              classNames={{ root: 'avatar-dropdown-overlay' }}
               menu={{ items: avatarMenu }}
             >
               <Avatar className="header-avatar">??</Avatar>

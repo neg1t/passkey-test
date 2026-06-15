@@ -1,3 +1,4 @@
+import { fixupPluginRules } from '@eslint/compat'
 import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
 import tsParser from '@typescript-eslint/parser'
@@ -28,7 +29,7 @@ export default tseslint.config(
   {
     extends: [js.configs.recommended, ...tseslint.configs.strictTypeChecked],
     plugins: {
-      react: react,
+      react: fixupPluginRules(react),
       effector: effector,
       import: _import,
       'unused-imports': unusedImports,
