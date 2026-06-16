@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 
 import {
+  KeyOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
@@ -11,12 +12,14 @@ import {
   Dropdown,
   Layout,
   Menu,
+  Modal,
   type MenuProps,
   theme,
 } from 'antd'
+import { useUnit } from 'effector-react'
 import { CSSTransition } from 'react-transition-group'
 
-import { logout } from 'entities/auth/model'
+import { events, stores } from 'entities/auth'
 
 import logo from 'shared/assets/logo.png'
 import { PageLoader } from 'shared/ui/PageLoader'
@@ -43,10 +46,26 @@ export function MainLayout({
   const {
     token: { colorBgContainer, borderRadiusLG, paddingLG },
   } = theme.useToken()
+  const {
+    dismissPasskeyPrompt,
+    passkeyPromptVisible,
+    passkeyRegistrationStatus,
+    registerPasskey,
+    signOut,
+  } = useUnit({
+    dismissPasskeyPrompt: events.passkeyPromptDismissed,
+    passkeyPromptVisible: stores.$passkeyPromptVisible,
+    passkeyRegistrationStatus: stores.$passkeyRegistrationStatus,
+    registerPasskey: events.registerPasskey,
+    signOut: events.logout,
+  })
+  const canRegisterPasskey =
+    passkeyRegistrationStatus === 'notRegistered' ||
+    passkeyRegistrationStatus === 'unavailable'
 
   const avatarMenu: MenuProps['items'] = [
     {
-      key: '1',
+      key: 'account',
       onClick: () => {},
       label: (
         <span>
@@ -54,10 +73,20 @@ export function MainLayout({
         </span>
       ),
     },
+    ...(canRegisterPasskey
+      ? [
+          {
+            key: 'register-passkey',
+            icon: <KeyOutlined />,
+            onClick: registerPasskey,
+            label: 'Регистрация passkey',
+          },
+        ]
+      : []),
     {
-      key: '2',
-      onClick: () => {},
-      label: <span onClick={logout}>Выйти</span>,
+      key: 'logout',
+      onClick: signOut,
+      label: <span>Выйти</span>,
     },
   ]
 
@@ -74,6 +103,19 @@ export function MainLayout({
       >
         <PageLoader logo={<img src={logo} alt="Logo" />} />
       </CSSTransition>
+      <Modal
+        open={passkeyPromptVisible}
+        title="Регистрация passkey"
+        okText="Зарегистрировать passkey"
+        cancelText="Позже"
+        onOk={registerPasskey}
+        onCancel={dismissPasskeyPrompt}
+      >
+        <p>
+          Подключите вход по passkey, чтобы входить в приложение через
+          биометрию, PIN или экранную блокировку устройства.
+        </p>
+      </Modal>
       <Layout className="layout" style={{ minHeight: '100vh' }}>
         <Sider theme="light" collapsible collapsed={collapsed} trigger={null}>
           <div className="slider-logo">

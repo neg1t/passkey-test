@@ -143,3 +143,26 @@ https://<vercel-project-domain>
 - [Keycloak hostname docs](https://www.keycloak.org/server/hostname)
 - [Keycloak reverse proxy docs](https://www.keycloak.org/server/reverseproxy)
 - [MDN WebAuthn secure context](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API)
+
+## Frontend-initiated passkey registration
+
+The frontend does not create WebAuthn credentials directly. It starts a Keycloak
+Application Initiated Action with:
+
+```text
+kc_action=webauthn-register-passwordless:skip_if_exists
+```
+
+Before showing the opt-in modal, the app calls:
+
+```text
+GET <VITE_AUTH_URL>/account/credentials
+Authorization: Bearer <access_token>
+```
+
+If Keycloak returns a `webauthn-passwordless` credential whose
+`userCredentialMetadatas` array is not empty, the app treats passkey
+registration as complete and hides the modal and dropdown action. If the Account
+API is unavailable, the modal is hidden but the user dropdown still shows the
+manual passkey registration action. The `skip_if_exists` suffix lets Keycloak
+safely skip registration for users who already have a passkey.

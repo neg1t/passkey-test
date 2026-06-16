@@ -1,7 +1,14 @@
-import { attach, createEvent, createStore, sample, scopeBind } from 'effector'
+import {
+  attach,
+  combine,
+  createEffect,
+  createEvent,
+  createStore,
+  sample,
+  scopeBind,
+} from 'effector'
 import { jwtDecode } from 'jwt-decode'
 import type { User, UserManager } from 'oidc-client-ts'
-import { debug } from 'patronum'
 
 import { $accessToken, apiApiRequestError } from 'shared/api'
 import { AuthError } from 'shared/api'
@@ -13,6 +20,7 @@ import {
   SCOPE,
 } from 'shared/config'
 
+import { hasRegisteredPasskey } from '../lib/keycloak-account'
 import { createUserManager } from '../lib/user-manager'
 
 export interface ITokenData {
@@ -28,8 +36,28 @@ export interface ITokenData {
   scope: string[]
 }
 
+export type PasskeyRegistrationStatus =
+  | 'unknown'
+  | 'loading'
+  | 'registered'
+  | 'notRegistered'
+  | 'unavailable'
+
+const PASSKEY_REGISTRATION_ACTION =
+  'webauthn-register-passwordless:skip_if_exists'
+const PASSKEY_PROMPT_STORAGE_PREFIX = 'passkeyPromptDismissed'
+
+function getPasskeyPromptStorageKey(tokenData: ITokenData | null) {
+  if (tokenData === null) return null
+
+  return `${PASSKEY_PROMPT_STORAGE_PREFIX}:${tokenData.iss}:${tokenData.sub}`
+}
+
 export const logout = createEvent()
 export const userReceived = createEvent<User>()
+export const passkeyPromptDismissed = createEvent()
+const passkeyCredentialsCheckStarted = createEvent<string>()
+export const registerPasskey = createEvent()
 const silentUpdateError = createEvent<Error>()
 
 const $manager = createStore<UserManager>(
@@ -44,6 +72,81 @@ const $manager = createStore<UserManager>(
 
 export const $tokenData = $accessToken.map((x) => x)
 
+export const $decodedToken = $accessToken.map((token) => {
+  if (token === null) return null as ITokenData | null
+
+  try {
+    return jwtDecode<ITokenData>(token)
+  } catch (error) {
+    console.error('Failed to decode token', error)
+    return null
+  }
+})
+
+export const fetchPasskeyCredentialsFx = createEffect((accessToken: string) =>
+  hasRegisteredPasskey({
+    accessToken,
+    authority: AUTH_URL,
+  }),
+)
+
+const checkPasskeyPromptDismissedFx = createEffect(
+  (tokenData: ITokenData | null) => {
+    const storageKey = getPasskeyPromptStorageKey(tokenData)
+    if (storageKey === null) return true
+
+    return sessionStorage.getItem(storageKey) === 'true'
+  },
+)
+
+const dismissPasskeyPromptFx = createEffect((tokenData: ITokenData | null) => {
+  const storageKey = getPasskeyPromptStorageKey(tokenData)
+  if (storageKey !== null) {
+    sessionStorage.setItem(storageKey, 'true')
+  }
+})
+
+const registerPasskeyFx = attach({
+  source: $manager,
+  effect: (manager) =>
+    manager.signinRedirect({
+      extraQueryParams: {
+        kc_action: PASSKEY_REGISTRATION_ACTION,
+      },
+    }),
+})
+
+const schedulePasskeyCredentialsCheckFx = createEffect(
+  (accessToken: string) => {
+    const passkeyCredentialsCheckStartedScope = scopeBind(
+      passkeyCredentialsCheckStarted,
+    )
+
+    window.setTimeout(() => passkeyCredentialsCheckStartedScope(accessToken), 0)
+  },
+)
+
+export const $passkeyRegistrationStatus =
+  createStore<PasskeyRegistrationStatus>('unknown')
+    .on(fetchPasskeyCredentialsFx, () => 'loading')
+    .on(fetchPasskeyCredentialsFx.doneData, (_, hasPasskey) =>
+      hasPasskey ? 'registered' : 'notRegistered',
+    )
+    .on(fetchPasskeyCredentialsFx.failData, () => 'unavailable')
+    .reset(logout)
+
+const $passkeyPromptDismissed = createStore(true)
+  .on(checkPasskeyPromptDismissedFx.doneData, (_, isDismissed) => isDismissed)
+  .on(passkeyPromptDismissed, () => true)
+  .on(registerPasskey, () => true)
+  .reset(logout)
+
+export const $passkeyPromptVisible = combine(
+  $passkeyRegistrationStatus,
+  $passkeyPromptDismissed,
+  (status, isDismissed) => status === 'notRegistered' && !isDismissed,
+)
+
 export const initUserManagerFx = attach({
   source: $manager,
   effect: (manager) => {
@@ -57,10 +160,14 @@ export const initUserManagerFx = attach({
 export const aquireUser = attach({
   source: $manager,
   effect: async (manager, search: string) => {
-    let data = await manager.getUser()
+    let data: User | null = null
 
-    if (data == null && search !== '') {
+    if (search !== '') {
       data = await manager.signinRedirectCallback(search)
+    }
+
+    if (data === null) {
+      data = await manager.getUser()
     }
 
     if (data === null) throw new Error('Failed to load user')
@@ -96,6 +203,39 @@ sample({
 })
 
 sample({
+  clock: [aquireUser.doneData, userReceived],
+  fn: (user) => user.access_token,
+  target: schedulePasskeyCredentialsCheckFx,
+})
+
+sample({
+  clock: passkeyCredentialsCheckStarted,
+  target: fetchPasskeyCredentialsFx,
+})
+
+sample({
+  clock: $decodedToken,
+  target: checkPasskeyPromptDismissedFx,
+})
+
+sample({
+  clock: passkeyPromptDismissed,
+  source: $decodedToken,
+  target: dismissPasskeyPromptFx,
+})
+
+sample({
+  clock: registerPasskey,
+  source: $decodedToken,
+  target: dismissPasskeyPromptFx,
+})
+
+sample({
+  clock: registerPasskey,
+  target: registerPasskeyFx,
+})
+
+sample({
   clock: logout,
   target: signoutUser,
 })
@@ -109,6 +249,3 @@ sample({
     accessToken.length > 0,
   target: logout,
 })
-
-//TODO убрать для прода
-debug({ accessToken: $accessToken, token: $tokenData })
